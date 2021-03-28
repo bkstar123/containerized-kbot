@@ -117,7 +117,7 @@ Example Deployment:
 ```
 docker container run -d --name reverse-proxy --network kbot-net -v reverse-proxy-config:/etc/nginx -p 80:80 nginx:latest
 ```
-Then, on the Docker host, run the command ```docker volume inspect reverse-proxy-config``` to find out the volume location. Go to that location, and then **conf.d** and edit the configuration file ```vim default.conf``` by placing the following:  
+Then, on the Docker host, run the command ```docker volume inspect reverse-proxy-config``` to find out the volume location. Go to that location, and then to **conf.d** and edit the configuration file by running ```vim default.conf``` & placing the following:  
 ```
 server {
     listen 80;
@@ -127,6 +127,6 @@ server {
     }
 }
 ```
-Stop/start the **reverse-proxy** service.
+Finally, stop/start the **reverse-proxy** service.
 
-## 4. Deploy services to a cluster of nodes (Orchestration)
+## 4. Deploy services to an orchestration cluster
