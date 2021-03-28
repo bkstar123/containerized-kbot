@@ -1,6 +1,6 @@
 # Containerized KBOT
 
-## Introduction
+## 1. Introduction
 
 This project is based on and a containerized version of KBOT project https://bkstar123@bitbucket.org/bkstar123/kbot.git. KBOT is a chatbot built with Botman framework to provide the following capabilities:  
 - Check TLS/SSL certificate information for a list of domains, email the result in csv format (it can then be imported to Excel)
@@ -10,7 +10,7 @@ This project is based on and a containerized version of KBOT project https://bks
 - Extract unique root/apex zone from a list of domains
 
 
-## Services
+## 2. Services
 
 The containerized KBOT appplication consists of the following services:  
 - **kbot-web**: A frontend interface for users to interact with the application. This service can be created using the Docker image **bkstar123/kbot-web:<tag>** (See details in https://hub.docker.com/repository/docker/bkstar123/kbot-web)
@@ -23,7 +23,7 @@ Alternatively, you can re-build all the above images using their respective Dock
 - ```cd ../web && docker image build -t kbot-web .```
 - ```cd ../worker && docker image build -t kbot-worker``` 
 
-## Deploy services to standalone containers
+## 3. Deploy services to standalone containers
 
 Firstly, create a custom bridge network in your Docker host (bridge network is used to connect containers in the scope of a single host):  
 ```docker network create -d bridge kbot-net```
@@ -31,7 +31,7 @@ Firstly, create a custom bridge network in your Docker host (bridge network is u
 (Note: If you want to use **overlay** network to connect standalone containers over multiple hosts, the **overlay** network must be created with the flag ```--attachable```)
 
 Then, You must deploy **kbot-db** service before the other services since they depend on it to start.  
-### kbot-db
+### 3.1 kbot-db
 ```
 docker container run -d  --name kbot-db \
 -e MYSQL_ROOT_PASSWORD=<your_desired_root_password> \
@@ -53,9 +53,9 @@ docker container run -d  --name kbot-db \
 --network kbot-net bkstar123/kbot-db
 ```
 **Note**:
-- **knot-db** image defines one mount point to export the MySQL data (under ```/var/lib/mysql```), you can specify a named volume in the Docker host to link with this mount point
+- **kbot-db** image defines one mount point to export the MySQL data (under ```/var/lib/mysql```), you can specify a named volume in the Docker host to link with this mount point
 
-### kbot-web
+### 3.2 kbot-web
 
 Example deployment:  
 ```
@@ -88,7 +88,7 @@ docker container run -d  --name kbot-web -p 8000:80 \
 - If you want to send application logs to your Slack webhook, then pass the ```-e LOG_CHANNEL=stack -e LOG_SLACK_WEBHOOK_URL=<your-slack-webhook> -e LOG_SLACK_USERNAME=KBOT``` environment variables to ```docker container run``` command
 - **kbot-web** image defines two mount points to export the web access/error logs (under ```/var/log/apache2```) and the application logs (under ```/var/www/html/kbot/storage/logs```), you can specify named volumes in the Docker host to link with these mount points
 
-### kbot-worker
+### 3.3 kbot-worker
 
 Example deployment:  
 ```
@@ -109,4 +109,24 @@ docker container run -d  --name kbot-worker \
 - If you want to send application logs to your Slack webhook, then pass the ```-e LOG_CHANNEL=stack -e LOG_SLACK_WEBHOOK_URL=<your-slack-webhook> -e LOG_SLACK_USERNAME=KBOT``` environment variables to ```docker container run``` command
 - **kbot-worker** image defines one mount point to export the worker logs (under ```/tmp/supervisord```), you can specify a named volume in the Docker host to link with these mount points
 
-## Deploy services to a cluster of nodes (Orchestration)
+### 3.4 Reverse proxy (optional)
+
+Assuming that, the URL to your app is ```http://containerized-kbot.acme.com```. You may want to place the **kbot-xxx** services behind a reverse proxy so that you can access the frontend interface by pointing browser to ```http://containerized-kbot.acme.com``` instead of ```http://containerized-kbot.acme.com:8000``` (i.e via the published port on the Docker host).  
+
+Example Deployment:  
+```
+docker container run -d --name reverse-proxy --network kbot-net -v reverse-proxy-config:/etc/nginx -p 80:80 nginx:latest
+```
+Then, on the Docker host, run the command ```docker volume inspect reverse-proxy-config``` to find out the volume location. Go to that location, and then **conf.d** and edit the configuration file ```vim default.conf``` by placing the following:  
+```
+server {
+    listen 80;
+    server_name containerized-kbot.acme.com;
+    location / {
+        proxy_pass http://kbot-web;
+    }
+}
+```
+Stop/start the **reverse-proxy** service.
+
+## 4. Deploy services to a cluster of nodes (Orchestration)
