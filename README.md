@@ -13,9 +13,9 @@ This project is based on and a containerized version of KBOT project https://bks
 ## Services
 
 The containerized KBOT appplication consists of the following services:  
-- **kbot-web**: A frontend interface for users to interact with the application. This service can be created using Docker image bkstar123/kbot-web:<tag> (See details in https://hub.docker.com/repository/docker/bkstar123/kbot-web)
-- **kbot-worker**: A worker to check the queue for dispatched jobs and esexute them. This service can be created using Docker image bkstar123/kbot-worker:<tag> (See details in https://hub.docker.com/repository/docker/bkstar123/kbot-worker)
-- **kbot-db**: A MySQL database to store the dispatched jobs in queue. This service can be created using Docker image bkstar123/kbot-db:<tag> (See details in https://hub.docker.com/repository/docker/bkstar123/kbot-db)
+- **kbot-web**: A frontend interface for users to interact with the application. This service can be created using the Docker image **bkstar123/kbot-web:<tag>** (See details in https://hub.docker.com/repository/docker/bkstar123/kbot-web)
+- **kbot-worker**: A worker to check the queue for dispatched jobs and esexute them. This service can be created using the Docker image **bkstar123/kbot-worker:<tag>** (See details in https://hub.docker.com/repository/docker/bkstar123/kbot-worker)
+- **kbot-db**: A MySQL database server to store the dispatched jobs in queue. This service can be created using the Docker image **bkstar123/kbot-db:<tag>** (See details in https://hub.docker.com/repository/docker/bkstar123/kbot-db)
 
 Alternatively, you can re-build all the above images using their respective Dockerfile files provided in this project and push them to your Docker registries/repositories. To do so, perform the below steps:  
 - ```git clone https://github.com/bkstar123/containerized-kbot.git``` to a location in your machine
