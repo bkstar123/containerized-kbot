@@ -42,7 +42,7 @@ docker container run -d  --name kbot-db \
 --network kbot-net bkstar123/kbot-db
 ```
 
-Example:  
+Example deployment:  
 ```
 docker container run -d  --name kbot-db \
 -e MYSQL_ROOT_PASSWORD=mysecretpassword \
@@ -56,6 +56,8 @@ docker container run -d  --name kbot-db \
 - **knot-db** image defines one mount point to export the MySQL data (under ```/var/lib/mysql```), you can specify a named volume in the Docker host to link with this mount point
 
 ### kbot-web
+
+Example deployment:  
 ```
 docker container run -d  --name kbot-web -p 8000:80 \
 -e APP_NAME=KBOT \
@@ -87,6 +89,8 @@ docker container run -d  --name kbot-web -p 8000:80 \
 - **kbot-web** image defines two mount points to export the web access/error logs (under ```/var/log/apache2```) and the application logs (under ```/var/www/html/kbot/storage/logs```), you can specify named volumes in the Docker host to link with these mount points
 
 ### kbot-worker
+
+Example deployment:  
 ```
 docker container run -d  --name kbot-worker \
 -e APP_ENV=production \
