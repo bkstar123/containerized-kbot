@@ -168,7 +168,8 @@ echo "xxxx" | docker secret create mailfrom -
 ### 4.4 Deploy KBOT services to the Swarm
 
 #### a) kbot-db
-```docker service create --name kbot-db \
+```
+docker service create --name kbot-db \
 --secret db_root_passwd \
 --secret kbot_db \
 --secret kbot_db_user \
