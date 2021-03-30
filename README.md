@@ -14,7 +14,7 @@ This project is based on and a containerized version of KBOT project https://bks
 
 The containerized KBOT appplication consists of the following services:  
 - **kbot-web**: A frontend interface for users to interact with the application. This service can be created using the Docker image **bkstar123/kbot-web:<tag>** (See details in https://hub.docker.com/repository/docker/bkstar123/kbot-web)
-- **kbot-worker**: A worker to check the queue for dispatched jobs and esexute them. This service can be created using the Docker image **bkstar123/kbot-worker:<tag>** (See details in https://hub.docker.com/repository/docker/bkstar123/kbot-worker)
+- **kbot-worker**: A worker to check the queue for dispatched jobs and execute them. This service can be created using the Docker image **bkstar123/kbot-worker:<tag>** (See details in https://hub.docker.com/repository/docker/bkstar123/kbot-worker)
 - **kbot-db**: A MySQL database server to store the dispatched jobs in queue. This service can be created using the Docker image **bkstar123/kbot-db:<tag>** (See details in https://hub.docker.com/repository/docker/bkstar123/kbot-db)
 
 Alternatively, you can re-build all the above images using their respective Dockerfile files provided in this project and push them to your Docker registries/repositories. To do so, perform the below steps:  
@@ -130,3 +130,96 @@ server {
 Finally, stop/start the **reverse-proxy** service.
 
 ## 4. Deploy services to an orchestration cluster
+
+Assume that we have 3 nodes with the following information:  
+```
+NAME    ACTIVE   DRIVER       STATE     URL                         SWARM   DOCKER      ERRORS
+node1   -        virtualbox   Running   tcp://192.168.99.100:2376           v19.03.12   
+node2   -        virtualbox   Running   tcp://192.168.99.101:2376           v19.03.12   
+node3   -        virtualbox   Running   tcp://192.168.99.102:2376           v19.03.12   
+```
+### 4.1 Build a Swarm cluster
+- Promote **node1** to Swarm leader manager:  
+ ```docker swarm init --advertise-addr 192.168.99.100```
+- Check the Swarm's join worker/manager tokens 
+```docker swarm join-token manager``` => take note of the joining manager token
+```docker swarm join-token worker``` => take note of the joining worker token
+- Go to **node2**, and join it to Swarm as a follower manager  
+```docker swarm join --token SWMTKN-1-1xr1d9e17qefweycd2shccmyagui6df97bce6o0e47cojyfhl0-clc22y0mi8b3qhay2juxt4ztu 192.168.99.100:2377 ```
+- Go to **node3**, and join it to Swarm as a worker  
+```docker swarm join --token SWMTKN-1-1xr1d9e17qefweycd2shccmyagui6df97bce6o0e47cojyfhl0-3r14g6tw2mgweq5t4xqy647d1 192.168.99.100:2377```
+
+### 4.2 Create a custom overlay network
+```docker network create -d overlay kbot-net```
+
+### 4.3 Create application secrets
+
+Run the following commands on **node1** (leader manager):  
+```
+echo "xxxx" | docker secret create db_root_passwd - 
+echo "xxxx" | docker secret create kbot_db -
+echo "xxxx" | docker secret create kbot_db_user -
+echo "xxxx" | docker secret create kbot_db_user_passwd -
+echo "xxxx" | docker secret create mailuser -
+echo "xxxx" | docker secret create mailpassword -
+echo "xxxx" | docker secret create mailfrom -
+```
+
+### 4.4 Deploy KBOT services to the Swarm
+
+#### a) kbot-db
+```docker service create --name kbot-db \
+--secret db_root_passwd \
+--secret kbot_db \
+--secret kbot_db_user \
+--secret kbot_db_user_passwd \
+-e MYSQL_ROOT_PASSWORD=/run/secrets/db_root_passwd \
+-e MYSQL_DATABASE=/run/secrets/kbot_db \
+-e MYSQL_USER=/tun/secrets/kbot_db_user \
+-e MYSQL_PASSWORD=/run/secrets/kbot_db_user_passwd \
+--mount type=volume,source=kbot-db-data,destination=/var/lib/mysql \
+--replicas 3 \
+--network kbot-net bkstar123/kbot-db
+```
+
+#### b) kbot-web
+```
+docker service create  --name kbot-web -p 8000:80 \
+-e APP_NAME=KBOT \
+-e APP_ENV=production \
+-e APP_DEBUG=false \
+-e APP_URL=http://containerized-kbot.acme.com \
+-e APP_TIMEZONE=Asia/Ho_Chi_Minh \
+-e DB_HOST=kbot-db \
+-e DB_DATABASE=/run/secrets/kbot_db \
+-e DB_USERNAME=/tun/secrets/kbot_db_user \
+-e DB_PASSWORD=/run/secrets/kbot_db_user_passwd \
+-e MAIL_DRIVER=smtp \
+-e MAIL_HOST=smtp.googlemail.com \
+-e MAIL_PORT=465 \
+-e MAIL_USERNAME=/run/secrets/mailuser \
+-e MAIL_PASSWORD=/run/secrets/mailpassword \
+-e MAIL_ENCRYPTION=ssl \
+-e MAIL_FROM_NAME=KBOT \
+-e MAIL_FROM_ADDRESS=/run/secrets/mailfrom \
+--mount type=volume,source=kbot-web-logs,destination=/var/log/apache2 \
+--mount type=volume,source=kbot-web-application-logs,target=/var/www/html/kbot/storage/logs \
+--network kbot-net bkstar123/kbot-web
+```
+
+#### c) kbot-worker
+```
+docker service create  --name kbot-worker \
+-e APP_ENV=production \
+-e APP_DEBUG=false \
+-e APP_TIMEZONE=Asia/Ho_Chi_Minh \
+-e DB_HOST=kbot-db \
+-e DB_DATABASE=/run/secrets/kbot_db \
+-e DB_USERNAME=/tun/secrets/kbot_db_user \
+-e DB_PASSWORD=/run/secrets/kbot_db_user_passwd \
+--mount type=volume,source=kbot-worker-logs,destination=/tmp/supervisord \
+--replicas 3 \
+--network kbot-net bkstar123/kbot-worker
+```
+
+## 5. Advanced deployment using Docker stack, secrets
