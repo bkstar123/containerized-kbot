@@ -160,9 +160,6 @@ echo "xxxx" | docker secret create db_root_passwd -
 echo "xxxx" | docker secret create kbot_db -
 echo "xxxx" | docker secret create kbot_db_user -
 echo "xxxx" | docker secret create kbot_db_user_passwd -
-echo "xxxx" | docker secret create mailuser -
-echo "xxxx" | docker secret create mailpassword -
-echo "xxxx" | docker secret create mailfrom -
 ```
 
 ### 4.4 Deploy KBOT services to the Swarm
@@ -186,6 +183,9 @@ docker service create --name kbot-db \
 #### b) kbot-web
 ```
 docker service create  --name kbot-web -p 8000:80 \
+--secret kbot_db \
+--secret kbot_db_user \
+--secret kbot_db_user_passwd \
 -e APP_NAME=KBOT \
 -e APP_ENV=production \
 -e APP_DEBUG=false \
@@ -198,11 +198,11 @@ docker service create  --name kbot-web -p 8000:80 \
 -e MAIL_DRIVER=smtp \
 -e MAIL_HOST=smtp.googlemail.com \
 -e MAIL_PORT=465 \
--e MAIL_USERNAME=/run/secrets/mailuser \
--e MAIL_PASSWORD=/run/secrets/mailpassword \
+-e MAIL_USERNAME=<your_email_address> \
+-e MAIL_PASSWORD=<your_password> \
 -e MAIL_ENCRYPTION=ssl \
 -e MAIL_FROM_NAME=KBOT \
--e MAIL_FROM_ADDRESS=/run/secrets/mailfrom \
+-e MAIL_FROM_ADDRESS=<your_email_address> \
 --mount type=volume,source=kbot-web-logs,destination=/var/log/apache2 \
 --mount type=volume,source=kbot-web-application-logs,target=/var/www/html/kbot/storage/logs \
 --network kbot-net bkstar123/kbot-web
@@ -211,6 +211,9 @@ docker service create  --name kbot-web -p 8000:80 \
 #### c) kbot-worker
 ```
 docker service create  --name kbot-worker \
+--secret kbot_db \
+--secret kbot_db_user \
+--secret kbot_db_user_passwd \
 -e APP_ENV=production \
 -e APP_DEBUG=false \
 -e APP_TIMEZONE=Asia/Ho_Chi_Minh \
