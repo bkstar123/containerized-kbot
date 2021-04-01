@@ -173,7 +173,7 @@ docker service create --name kbot-db \
 --secret kbot_db_user_passwd \
 -e MYSQL_ROOT_PASSWORD=/run/secrets/db_root_passwd \
 -e MYSQL_DATABASE=/run/secrets/kbot_db \
--e MYSQL_USER=/tun/secrets/kbot_db_user \
+-e MYSQL_USER=/run/secrets/kbot_db_user \
 -e MYSQL_PASSWORD=/run/secrets/kbot_db_user_passwd \
 --mount type=volume,source=kbot-db-data,destination=/var/lib/mysql \
 --replicas 3 \
@@ -193,7 +193,7 @@ docker service create  --name kbot-web -p 8000:80 \
 -e APP_TIMEZONE=Asia/Ho_Chi_Minh \
 -e DB_HOST=kbot-db \
 -e DB_DATABASE=/run/secrets/kbot_db \
--e DB_USERNAME=/tun/secrets/kbot_db_user \
+-e DB_USERNAME=/run/secrets/kbot_db_user \
 -e DB_PASSWORD=/run/secrets/kbot_db_user_passwd \
 -e MAIL_DRIVER=smtp \
 -e MAIL_HOST=smtp.googlemail.com \
@@ -219,7 +219,7 @@ docker service create  --name kbot-worker \
 -e APP_TIMEZONE=Asia/Ho_Chi_Minh \
 -e DB_HOST=kbot-db \
 -e DB_DATABASE=/run/secrets/kbot_db \
--e DB_USERNAME=/tun/secrets/kbot_db_user \
+-e DB_USERNAME=/run/secrets/kbot_db_user \
 -e DB_PASSWORD=/run/secrets/kbot_db_user_passwd \
 --mount type=volume,source=kbot-worker-logs,destination=/tmp/supervisord \
 --replicas 3 \
@@ -227,3 +227,17 @@ docker service create  --name kbot-worker \
 ```
 
 ## 5. Advanced deployment using Docker stack, secrets
+
+Run the following commands on **node1** (leader manager):  
+```
+echo "xxxx" | docker secret create db_root_passwd - 
+echo "xxxx" | docker secret create kbot_db -
+echo "xxxx" | docker secret create kbot_db_user -
+echo "xxxx" | docker secret create kbot_db_user_passwd -
+```
+
+Create an overlay network named **kbot-net**:  
+```docker network create -d overlay kbot-net```
+
+Copy **docker-stack.yml** to the **node1** (leader manager), then deploy the stack file:  
+```docker stack deploy -c docker-stack.yml kbot```

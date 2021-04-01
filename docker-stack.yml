@@ -1,0 +1,126 @@
+# author: tuanha
+# last-modified: 01-Apr-2021
+version: "3.4"
+services:
+  kbot-web:
+    image: bkstar123/kbot-web
+    ports:
+      - "8000:80"
+    secrets:
+      - source: kbot_db
+        target: kbot_db
+      - source: kbot_db_user
+        target: kbot_db_user
+      - source: kbot_db_user_passwd
+        target: kbot_db_user_passwd
+    networks:
+      - kbot-net 
+    volumes:
+      - kbot-web-logs:/var/log/apache2
+      - kbot-web-application-logs:/var/www/html/kbot/storage/logs
+    environment:
+      - "APP_NAME=${APP_NAME}"
+      - "APP_ENV=${APP_ENV}"
+      - "APP_DEBUG=${APP_DEBUG}"
+      - "APP_URL=${APP_URL}"
+      - "APP_TIMEZONE=${APP_TIMEZONE}"
+      - "DB_HOST=${DB_HOST}"
+      - "DB_DATABASE=/run/secrets/kbot_db"
+      - "DB_USERNAME=/tun/secrets/kbot_db_user"
+      - "DB_PASSWORD=/run/secrets/kbot_db_user_passwd"
+      - "MAIL_DRIVER=${MAIL_DRIVER}"
+      - "MAIL_HOST=${MAIL_HOST}"
+      - "MAIL_PORT=${MAIL_PORT}"
+      - "MAIL_USERNAME=${MAIL_USERNAME}"
+      - "MAIL_PASSWORD=${MAIL_PASSWORD}"
+      - "MAIL_ENCRYPTION=${MAIL_ENCRYPTION}"
+      - "MAIL_FROM_NAME=${MAIL_FROM_NAME}"
+      - "MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+  kbot-db:
+    image: bkstar123/kbot-db
+    secrets:
+      - source: kbot_db
+        target: kbot_db
+      - source: kbot_db_user
+        target: kbot_db_user
+      - source: kbot_db_user_passwd
+        target: kbot_db_user_passwd
+      - source: db_root_passwd
+        target: db_root_passwd
+    networks:
+      - kbot-net
+    volumes:
+      - kbot-db-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: /run/secrets/db_root_passwd
+      MYSQL_DATABASE: /run/secrets/kbot_db
+      MYSQL_USER: /run/secrets/kbot_db_user
+      MYSQL_PASSWORD: /run/secrets/kbot_db_user_passwd
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 2
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+  kbot-worker:
+    image: bkstar123/kbot-worker
+    secrets:
+      - source: kbot_db
+        target: kbot_db
+      - source: kbot_db_user
+        target: kbot_db_user
+      - source: kbot_db_user_passwd
+        target: kbot_db_user_passwd
+    networks:
+      - kbot-net
+    volumes:
+      - kbot-worker-logs:/tmp/supervisord
+      - kbot-worker-application-logs:/var/www/html/kbot/storage/logs
+    environment:
+      MYSQL_DATABASE: /run/secrets/kbot_db
+      MYSQL_USER: /run/secrets/kbot_db_user
+      MYSQL_PASSWORD: /run/secrets/kbot_db_user_passwd
+      APP_ENV: "${APP_ENV}"
+      APP_DEBUG: "${APP_DEBUG}"
+      APP_TIMEZONE: "${APP_TIMEZONE}"
+      DB_HOST: "${DB_HOST}"
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 2
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+volumes:
+  kbot-web-logs:
+  kbot-web-application-logs:
+  kbot-db-data:
+  kbot-worker-logs:
+  kbot-worker-application-logs:
+networks:
+  kbot-net:
+    driver: overlay
+    external: true
+secrets:
+  kbot_db:
+    external: true
+  kbot_db_user:
+    external: true
+  kbot_db_user_passwd:
+    external: true
+  db_root_passwd:
+    external: true
