@@ -26,7 +26,7 @@ services:
       - "APP_TIMEZONE=${APP_TIMEZONE}"
       - "DB_HOST=${DB_HOST}"
       - "DB_DATABASE=/run/secrets/kbot_db"
-      - "DB_USERNAME=/tun/secrets/kbot_db_user"
+      - "DB_USERNAME=/run/secrets/kbot_db_user"
       - "DB_PASSWORD=/run/secrets/kbot_db_user_passwd"
       - "MAIL_DRIVER=${MAIL_DRIVER}"
       - "MAIL_HOST=${MAIL_HOST}"

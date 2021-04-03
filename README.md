@@ -129,7 +129,7 @@ server {
 ```
 Finally, stop/start the **reverse-proxy** service.
 
-## 4. Deploy services to an orchestration cluster
+## 4. Deploy services to an orchestration cluster (Swarm)
 
 Assume that we have 3 nodes with the following information:  
 ```
@@ -162,7 +162,7 @@ echo "xxxx" | docker secret create kbot_db_user -
 echo "xxxx" | docker secret create kbot_db_user_passwd -
 ```
 
-### 4.4 Deploy KBOT services to the Swarm
+### 4.4 Deploy KBOT services to the Swarm cluster
 
 #### a) kbot-db
 ```
@@ -226,9 +226,28 @@ docker service create  --name kbot-worker \
 --network kbot-net bkstar123/kbot-worker
 ```
 
-## 5. Advanced deployment using Docker stack, secrets
+#### d) kbot-proxy
+```
+docker service create --name kbot-proxy --network kbot-net --mount type=volume,source=kbot-proxy-config,target=/etc/nginx -p 80:80 nginx:latest 
+```
 
-Run the following commands on **node1** (leader manager):  
+Find the node(s) where the service task is running, then go to the volume path, place the following settings in **conf.d/default.conf**:  
+```
+server {
+    listen 80;
+    server_name containerized-kbot.acme.com;
+    location / {
+        proxy_pass http://kbot-web;
+    }
+}
+```
+
+### 4.5. Advanced deployment using Docker stack, secrets
+Fill in all environment settings in **.env.example**, and copy it as **.env** together with **docker-stack.yml** to the **node1**  
+
+Run the following commands on **node1** (leader manager): 
+
+Create necessary secrets:   
 ```
 echo "xxxx" | docker secret create db_root_passwd - 
 echo "xxxx" | docker secret create kbot_db -
@@ -239,5 +258,32 @@ echo "xxxx" | docker secret create kbot_db_user_passwd -
 Create an overlay network named **kbot-net**:  
 ```docker network create -d overlay kbot-net```
 
-Copy **docker-stack.yml** to the **node1** (leader manager), then deploy the stack file:  
-```docker stack deploy -c docker-stack.yml kbot```
+Deploy the stack file:  
+```env $(cat .env | xargs) docker stack deploy -c docker-stack.yml kbot```
+
+Remove **.env** file:  
+```rm -rf .env```  
+
+Create **kbot-proxy** service as shown in **4.4 d**  
+
+Scale **kbot-proxy**:  
+```docker service scale kbot-proxy=3```
+
+Go to each node where the **kbot-proxy** tasks are running, and place the same settings of **conf.d/default.conf** as shown in **4.4 d**, restart all service replicas (for example: ```docker service scale kbot-proxy=0 && docker service scale kbot-proxy=3```).      
+
+**Note**: 
+- ```docker stack deploy``` does not load **.env** file as ```docker-compose up``` does. So, we need to parse **.env** and pass all evironment variables to the context where ```docker stack deploy``` run  
+- Docker **secrets** does not work properly with special characters  
+- Sensitive data should not be put in the **.env** file. So in practice, you should not place your email password into **MAIL_PASSWORD** environment setting like my example  
+
+### 4.6 Update the Swarm with more advanced settings
+
+Run the following command in the **node1** (leader manager):  
+**a) Enable Swarm auto-lock**
+```docker swarm update --autolock=true```
+
+**b) Set the certificate rotation period to more restrict value**
+```docker swarm update --cert-expiry 720h``` (default to 90 days)
+
+## 5. Deploy services to a Kubernetes cluster
+- To be written
