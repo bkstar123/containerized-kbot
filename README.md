@@ -279,10 +279,10 @@ Go to each node where the **kbot-proxy** tasks are running, and place the same s
 ### 4.6 Update the Swarm with more advanced settings
 
 Run the following command in the **node1** (leader manager):  
-**a) Enable Swarm auto-lock**
+**a) Enable Swarm auto-lock**  
 ```docker swarm update --autolock=true```
 
-**b) Set the certificate rotation period to more restrict value**
+**b) Set the certificate rotation period to more restrict value**  
 ```docker swarm update --cert-expiry 720h``` (default to 90 days)
 
 ## 5. Deploy services to a Kubernetes cluster
