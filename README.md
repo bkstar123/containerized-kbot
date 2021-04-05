@@ -160,6 +160,8 @@ echo "xxxx" | docker secret create db_root_passwd -
 echo "xxxx" | docker secret create kbot_db -
 echo "xxxx" | docker secret create kbot_db_user -
 echo "xxxx" | docker secret create kbot_db_user_passwd -
+echo "xxxx" | docker secret create mailuser -
+echo "xxxx" | docker secret create mailpass -
 ```
 
 ### 4.4 Deploy KBOT services to the Swarm cluster
@@ -171,10 +173,10 @@ docker service create --name kbot-db \
 --secret kbot_db \
 --secret kbot_db_user \
 --secret kbot_db_user_passwd \
--e MYSQL_ROOT_PASSWORD=/run/secrets/db_root_passwd \
--e MYSQL_DATABASE=/run/secrets/kbot_db \
--e MYSQL_USER=/run/secrets/kbot_db_user \
--e MYSQL_PASSWORD=/run/secrets/kbot_db_user_passwd \
+-e MYSQL_ROOT_PASSWORD_FILE=/run/secrets/db_root_passwd \
+-e MYSQL_DATABASE_FILE=/run/secrets/kbot_db \
+-e MYSQL_USER_FILE=/run/secrets/kbot_db_user \
+-e MYSQL_PASSWORD_FILE=/run/secrets/kbot_db_user_passwd \
 --mount type=volume,source=kbot-db-data,destination=/var/lib/mysql \
 --replicas 3 \
 --network kbot-net bkstar123/kbot-db
@@ -192,17 +194,17 @@ docker service create  --name kbot-web -p 8000:80 \
 -e APP_URL=http://containerized-kbot.acme.com \
 -e APP_TIMEZONE=Asia/Ho_Chi_Minh \
 -e DB_HOST=kbot-db \
--e DB_DATABASE=/run/secrets/kbot_db \
--e DB_USERNAME=/run/secrets/kbot_db_user \
--e DB_PASSWORD=/run/secrets/kbot_db_user_passwd \
+-e DB_DATABASE_FILE=/run/secrets/kbot_db \
+-e DB_USERNAME_FILE=/run/secrets/kbot_db_user \
+-e DB_PASSWORD_FILE=/run/secrets/kbot_db_user_passwd \
 -e MAIL_DRIVER=smtp \
 -e MAIL_HOST=smtp.googlemail.com \
 -e MAIL_PORT=465 \
--e MAIL_USERNAME=<your_email_address> \
--e MAIL_PASSWORD=<your_password> \
+-e MAIL_USERNAME=/run/secrets/mailuser \
+-e MAIL_PASSWORD=/run/secrets/mailpass \
 -e MAIL_ENCRYPTION=ssl \
 -e MAIL_FROM_NAME=KBOT \
--e MAIL_FROM_ADDRESS=<your_email_address> \
+-e MAIL_FROM_ADDRESS=kbot-no-reply@gmail.com \
 --mount type=volume,source=kbot-web-logs,destination=/var/log/apache2 \
 --mount type=volume,source=kbot-web-application-logs,target=/var/www/html/kbot/storage/logs \
 --network kbot-net bkstar123/kbot-web
@@ -218,9 +220,9 @@ docker service create  --name kbot-worker \
 -e APP_DEBUG=false \
 -e APP_TIMEZONE=Asia/Ho_Chi_Minh \
 -e DB_HOST=kbot-db \
--e DB_DATABASE=/run/secrets/kbot_db \
--e DB_USERNAME=/run/secrets/kbot_db_user \
--e DB_PASSWORD=/run/secrets/kbot_db_user_passwd \
+-e DB_DATABASE_FILE=/run/secrets/kbot_db \
+-e DB_USERNAME_FILE=/run/secrets/kbot_db_user \
+-e DB_PASSWORD_FILE=/run/secrets/kbot_db_user_passwd \
 --mount type=volume,source=kbot-worker-logs,destination=/tmp/supervisord \
 --replicas 3 \
 --network kbot-net bkstar123/kbot-worker
@@ -253,6 +255,8 @@ echo "xxxx" | docker secret create db_root_passwd -
 echo "xxxx" | docker secret create kbot_db -
 echo "xxxx" | docker secret create kbot_db_user -
 echo "xxxx" | docker secret create kbot_db_user_passwd -
+echo "xxxx" | docker secret create mailuser -
+echo "xxxx" | docker secret create mailpass -
 ```
 
 Create an overlay network named **kbot-net**:  
@@ -273,8 +277,6 @@ Go to each node where the **kbot-proxy** tasks are running, and place the same s
 
 **Note**: 
 - ```docker stack deploy``` does not load **.env** file as ```docker-compose up``` does. So, we need to parse **.env** and pass all evironment variables to the context where ```docker stack deploy``` run  
-- Docker **secrets** does not work properly with special characters  
-- Sensitive data should not be put in the **.env** file. So in practice, you should not place your email password into **MAIL_PASSWORD** environment setting like my example  
 
 ### 4.6 Update the Swarm with more advanced settings
 

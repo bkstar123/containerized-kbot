@@ -25,14 +25,14 @@ services:
       - "APP_URL=${APP_URL}"
       - "APP_TIMEZONE=${APP_TIMEZONE}"
       - "DB_HOST=${DB_HOST}"
-      - "DB_DATABASE=/run/secrets/kbot_db"
-      - "DB_USERNAME=/run/secrets/kbot_db_user"
-      - "DB_PASSWORD=/run/secrets/kbot_db_user_passwd"
+      - "DB_DATABASE_FILE=/run/secrets/kbot_db"
+      - "DB_USERNAME_FILE=/run/secrets/kbot_db_user"
+      - "DB_PASSWORD_FILE=/run/secrets/kbot_db_user_passwd"
       - "MAIL_DRIVER=${MAIL_DRIVER}"
       - "MAIL_HOST=${MAIL_HOST}"
       - "MAIL_PORT=${MAIL_PORT}"
-      - "MAIL_USERNAME=${MAIL_USERNAME}"
-      - "MAIL_PASSWORD=${MAIL_PASSWORD}"
+      - "MAIL_USERNAME_FILE=/run/secrets/mailuser"
+      - "MAIL_PASSWORD_FILE=/run/secrets/mailpass"
       - "MAIL_ENCRYPTION=${MAIL_ENCRYPTION}"
       - "MAIL_FROM_NAME=${MAIL_FROM_NAME}"
       - "MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}"
@@ -59,10 +59,10 @@ services:
     volumes:
       - kbot-db-data:/var/lib/mysql
     environment:
-      MYSQL_ROOT_PASSWORD: /run/secrets/db_root_passwd
-      MYSQL_DATABASE: /run/secrets/kbot_db
-      MYSQL_USER: /run/secrets/kbot_db_user
-      MYSQL_PASSWORD: /run/secrets/kbot_db_user_passwd
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_passwd
+      MYSQL_DATABASE_FILE: /run/secrets/kbot_db
+      MYSQL_USER_FILE: /run/secrets/kbot_db_user
+      MYSQL_PASSWORD_FILE: /run/secrets/kbot_db_user_passwd
     deploy:
       replicas: 3
       update_config:
@@ -88,9 +88,9 @@ services:
       - kbot-worker-logs:/tmp/supervisord
       - kbot-worker-application-logs:/var/www/html/kbot/storage/logs
     environment:
-      MYSQL_DATABASE: /run/secrets/kbot_db
-      MYSQL_USER: /run/secrets/kbot_db_user
-      MYSQL_PASSWORD: /run/secrets/kbot_db_user_passwd
+      DB_DATABASE_FILE: /run/secrets/kbot_db
+      DB_USERNAME_FILE: /run/secrets/kbot_db_user
+      DB_PASSWORD_FILE: /run/secrets/kbot_db_user_passwd
       APP_ENV: "${APP_ENV}"
       APP_DEBUG: "${APP_DEBUG}"
       APP_TIMEZONE: "${APP_TIMEZONE}"
