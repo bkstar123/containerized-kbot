@@ -188,6 +188,8 @@ docker service create  --name kbot-web -p 8000:80 \
 --secret kbot_db \
 --secret kbot_db_user \
 --secret kbot_db_user_passwd \
+--secret mailuser \
+--secret mailpass \
 -e APP_NAME=KBOT \
 -e APP_ENV=production \
 -e APP_DEBUG=false \

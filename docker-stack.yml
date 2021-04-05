@@ -13,6 +13,10 @@ services:
         target: kbot_db_user
       - source: kbot_db_user_passwd
         target: kbot_db_user_passwd
+      - source: mailuser
+        target: mailuser
+      - source: mailpass
+        target: mailpass
     networks:
       - kbot-net 
     volumes:
