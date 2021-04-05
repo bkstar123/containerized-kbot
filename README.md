@@ -200,8 +200,8 @@ docker service create  --name kbot-web -p 8000:80 \
 -e MAIL_DRIVER=smtp \
 -e MAIL_HOST=smtp.googlemail.com \
 -e MAIL_PORT=465 \
--e MAIL_USERNAME=/run/secrets/mailuser \
--e MAIL_PASSWORD=/run/secrets/mailpass \
+-e MAIL_USERNAME_FILE=/run/secrets/mailuser \
+-e MAIL_PASSWORD_FILE=/run/secrets/mailpass \
 -e MAIL_ENCRYPTION=ssl \
 -e MAIL_FROM_NAME=KBOT \
 -e MAIL_FROM_ADDRESS=kbot-no-reply@gmail.com \
