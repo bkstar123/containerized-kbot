@@ -128,3 +128,7 @@ secrets:
     external: true
   db_root_passwd:
     external: true
+  mailuser:
+    external: true
+  mailpass:
+    external: true
