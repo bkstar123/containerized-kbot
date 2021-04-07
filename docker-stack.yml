@@ -40,6 +40,7 @@ services:
       - "MAIL_ENCRYPTION=${MAIL_ENCRYPTION}"
       - "MAIL_FROM_NAME=${MAIL_FROM_NAME}"
       - "MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}"
+      - "QUEUE_CONNECTION=${QUEUE_CONNECTION}"
     deploy:
       replicas: 1
       restart_policy:
@@ -86,6 +87,10 @@ services:
         target: kbot_db_user
       - source: kbot_db_user_passwd
         target: kbot_db_user_passwd
+      - source: mailuser
+        target: mailuser
+      - source: mailpass
+        target: mailpass
     networks:
       - kbot-net
     volumes:
@@ -99,6 +104,15 @@ services:
       APP_DEBUG: "${APP_DEBUG}"
       APP_TIMEZONE: "${APP_TIMEZONE}"
       DB_HOST: "${DB_HOST}"
+      QUEUE_CONNECTION: "${QUEUE_CONNECTION}"
+      MAIL_DRIVER: "${MAIL_DRIVER}"
+      MAIL_HOST: "${MAIL_HOST}"
+      MAIL_PORT: "${MAIL_PORT}"
+      MAIL_USERNAME_FILE: /run/secrets/mailuser
+      MAIL_PASSWORD_FILE: /run/secrets/mailpass
+      MAIL_ENCRYPTION: "${MAIL_ENCRYPTION}"
+      MAIL_FROM_NAME: "${MAIL_FROM_NAME}"
+      MAIL_FROM_ADDRESS: "${MAIL_FROM_ADDRESS}"
     deploy:
       replicas: 3
       update_config:

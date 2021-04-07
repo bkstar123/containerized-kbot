@@ -1,4 +1,4 @@
-# Containerized KBOT
+# Containerized KBOT (for Docker training purpose)
 
 ## 1. Introduction
 
@@ -7,7 +7,10 @@ This project is based on and a containerized version of KBOT project https://bks
 - Check DNS A/CNAME records for a list of domains, email the result in csv format (it can then be imported to Excel)
 - Decode TLS/SSL certificate data
 - Decode Certificate Signing Request (CSR)
-- Extract unique root/apex zone from a list of domains
+- Extract unique root/apex zone from a list of domains  
+
+**Note**:  
+This demo project is not designed for micro-service deployment, it was actually containerized from a monolithic-designed source code (https://bkstar123@bitbucket.org/bkstar123/kbot.git). The main objective is to be focus on Docker's perspectives where it shows how to containerize an application, break it into services and deploy them to either standalone containers or to a Swarm cluster. Therefore, this project ignores all aspects of micro-service design and the rationality of the scaling plan. The application works well in case of having a single replica/task for each service **kbot-web**, **kbot-worker**, **kbot-db**.  
 
 
 ## 2. Services
