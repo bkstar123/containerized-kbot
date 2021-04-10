@@ -254,7 +254,7 @@ bkstar123/kbot-worker
 We will force the **kbot-proxy** service's replica to be created on the **node3** only (i.e use **node3** only for traffic proxying/load balancing purpose)  
 
 ```
-docker service create --name kbot-proxy --network kbot-net --mount type=volume,source=kbot-proxy-config,target=/etc/nginx --constraint 'node.labels.proxy == yes'-p 80:80 nginx:latest 
+docker service create --name kbot-proxy --network kbot-net --mount type=volume,source=kbot-proxy-config,target=/etc/nginx --constraint 'node.labels.proxy == yes' -p 80:80 nginx:latest
 ```
 
 Find the node where the service task is running, then go to the volume path, place the following settings in **conf.d/default.conf**:  
