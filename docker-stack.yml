@@ -43,6 +43,9 @@ services:
       - "QUEUE_CONNECTION=${QUEUE_CONNECTION}"
     deploy:
       replicas: 1
+      placement:
+        constraints:
+          - 'node.labels.proxy != yes'
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -69,10 +72,10 @@ services:
       MYSQL_USER_FILE: /run/secrets/kbot_db_user
       MYSQL_PASSWORD_FILE: /run/secrets/kbot_db_user_passwd
     deploy:
-      replicas: 3
-      update_config:
-        parallelism: 2
-        failure_action: rollback
+      replicas: 1
+      placement:
+        constraints:
+          - 'node.labels.proxy != yes'
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -114,10 +117,10 @@ services:
       MAIL_FROM_NAME: "${MAIL_FROM_NAME}"
       MAIL_FROM_ADDRESS: "${MAIL_FROM_ADDRESS}"
     deploy:
-      replicas: 3
-      update_config:
-        parallelism: 2
-        failure_action: rollback
+      replicas: 1
+      placement:
+        constraints:
+          - 'node.labels.proxy != yes'
       restart_policy:
         condition: on-failure
         delay: 5s
