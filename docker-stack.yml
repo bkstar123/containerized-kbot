@@ -103,9 +103,11 @@ services:
       DB_DATABASE_FILE: /run/secrets/kbot_db
       DB_USERNAME_FILE: /run/secrets/kbot_db_user
       DB_PASSWORD_FILE: /run/secrets/kbot_db_user_passwd
+      APP_NAME: "${APP_NAME}"
       APP_ENV: "${APP_ENV}"
       APP_DEBUG: "${APP_DEBUG}"
       APP_TIMEZONE: "${APP_TIMEZONE}"
+      APP_URL: "${APP_URL}"
       DB_HOST: "${DB_HOST}"
       QUEUE_CONNECTION: "${QUEUE_CONNECTION}"
       MAIL_DRIVER: "${MAIL_DRIVER}"
