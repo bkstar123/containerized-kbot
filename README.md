@@ -25,6 +25,9 @@ Alternatively, you can re-build all the above images using their respective Dock
 - ```cd ../web && docker image build -t kbot-web .```
 - ```cd ../worker && docker image build -t kbot-worker``` 
 
+The service connection diagram is as follows:  
+<img src="https://github.com/bkstar123/containerized-kbot/blob/master/pictures/connection_topology.png?raw=true" alt="Connection Diagram" style="width:100%;"/>
+
 ## 3. Deploy services to standalone containers
 
 Firstly, create a custom bridge network in your Docker host (bridge network is used to connect containers in the scope of a single host):  
@@ -140,6 +143,10 @@ node1   -        virtualbox   Running   tcp://192.168.99.100:2376           v19.
 node2   -        virtualbox   Running   tcp://192.168.99.101:2376           v19.03.12   
 node3   -        virtualbox   Running   tcp://192.168.99.102:2376           v19.03.12   
 ```
+
+The deployment topology is as follows:  
+<img src="https://raw.githubusercontent.com/bkstar123/containerized-kbot/master/pictures/deployment_diagram.png" alt="Connection Diagram" style="width:100%;"/>
+
 ### 4.1 Build a Swarm cluster
 - Promote **node1** to Swarm leader manager:  
  ```docker swarm init --advertise-addr 192.168.99.100```
