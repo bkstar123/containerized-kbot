@@ -9,6 +9,9 @@ This project is based on and a containerized version of KBOT project https://bks
 - Decode Certificate Signing Request (CSR)
 - Extract unique root/apex zone from a list of domains  
 
+The application UI is as follows:  
+<img src="https://github.com/bkstar123/containerized-kbot/blob/master/pictures/applicaiton_ui.png?raw=true" alt="Application UI" style="width:100%;"/>
+
 **Note**:  
 This demo project is not designed for micro-service deployment, it was actually containerized from a monolithic-designed source code (https://bkstar123@bitbucket.org/bkstar123/kbot.git). The main objective is to be focus on Docker's perspectives where it shows how to containerize an application, break it into services and deploy them to either standalone containers or to a Swarm cluster. Therefore, this project ignores all aspects of micro-service design and the rationality of the scaling plan. The application works well in case of having a single replica/task for each service **kbot-web**, **kbot-worker**, **kbot-db**.  
 
@@ -145,7 +148,7 @@ node3   -        virtualbox   Running   tcp://192.168.99.102:2376           v19.
 ```
 
 The deployment topology is as follows:  
-<img src="https://raw.githubusercontent.com/bkstar123/containerized-kbot/master/pictures/deployment_diagram.png" alt="Connection Diagram" style="width:100%;"/>
+<img src="https://raw.githubusercontent.com/bkstar123/containerized-kbot/master/pictures/deployment_diagram.png" alt="Deployment Diagram" style="width:100%;"/>
 
 ### 4.1 Build a Swarm cluster
 - Promote **node1** to Swarm leader manager:  
