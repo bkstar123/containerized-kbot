@@ -1,3 +1,4 @@
 examples.txt
 /.project
 .env
+docker-stack.yml

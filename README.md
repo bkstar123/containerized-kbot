@@ -282,7 +282,7 @@ Restart the service's task: ```docker service scale kbot-proxy=0 && docker servi
 **Note**: if you do not specify the option ```--replicas```, then the service is default to create 01 replica/task  
 
 ### 4.5. Advanced deployment using Docker stack, secrets
-Fill in all environment settings in **.env.example**, and copy it as **.env** together with **docker-stack.yml** to the **node1**  
+Fill in all environment settings in **.env.example**, and copy it as **.env** together with **docker-stack-template.yml** to the **node1**. Make a copy of **docker-stack-template.yml** as **docker-stack.yml**. Then, You can use it further for your own stack configuration.  
 
 Run the following commands on **node1** (leader manager): 
 
