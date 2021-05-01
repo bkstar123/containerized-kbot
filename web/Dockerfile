@@ -31,12 +31,9 @@ RUN a2ensite kbot.conf && \
     chown $APACHE_RUN_USER:$APACHE_RUN_GROUP -R . && \
     apt-get install -y nodejs npm && \
     npm install && npm run production && npm prune --production
-# Schedule a cronjob for the Laravel scheduler
-RUN echo "* * * * * cd /var/www/html/kbot && php artisan schedule:run >> /dev/null 2>&1" > /tmp/cron_list && \
-    crontab /tmp/cron_list && \
-    rm -rf /tmp/cron_list && \
-    service cron start
 WORKDIR /var/www/html/kbot
 # container mounting points for apache2 & application logs
 VOLUME /var/log/apache2 /var/www/html/kbot/storage/logs
-ENTRYPOINT . /etc/apache2/envvars && /usr/sbin/apache2 -k start -DFOREGROUND
+COPY entrypoint.sh /usr/local/bin/
+RUN chmod u+x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["entrypoint.sh"]
