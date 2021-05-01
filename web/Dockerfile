@@ -34,7 +34,8 @@ RUN a2ensite kbot.conf && \
 # Schedule a cronjob for the Laravel scheduler
 RUN echo "* * * * * cd /var/www/html/kbot && php artisan schedule:run >> /dev/null 2>&1" > /tmp/cron_list && \
     crontab /tmp/cron_list && \
-    rm -rf /tmp/cron_list
+    rm -rf /tmp/cron_list && \
+    service cron start
 WORKDIR /var/www/html/kbot
 # container mounting points for apache2 & application logs
 VOLUME /var/log/apache2 /var/www/html/kbot/storage/logs
